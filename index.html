@@ -56,17 +56,17 @@
         <!-- RESUMEN (TABLA) -->
         <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
             <div class="bg-blue-600 px-4 py-3 border-b border-blue-700">
-                <h3 class="text-white font-semibold text-sm">Últimos Datos Cargados</h3>
+                <h3 class="text-white font-semibold text-sm">Últimos Datos Cargados (Historial Completo)</h3>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+            <div class="overflow-x-auto max-h-96"> <!-- Scroll si hay muchos datos -->
+                <table class="w-full text-sm text-left relative">
+                    <thead class="bg-gray-50 text-gray-600 uppercase text-xs sticky top-0 z-10 shadow-sm">
                         <tr>
-                            <th class="px-4 py-3">Periodo</th>
-                            <th class="px-4 py-3 text-right">Lectra</th>
-                            <th class="px-4 py-3 text-right">Trozadora</th>
-                            <th class="px-4 py-3 text-right">Otros</th>
-                            <th class="px-4 py-3 text-right font-bold text-black">Total</th>
+                            <th class="px-4 py-3 bg-gray-50">Periodo</th>
+                            <th class="px-4 py-3 text-right bg-gray-50">Lectra</th>
+                            <th class="px-4 py-3 text-right bg-gray-50">Trozadora</th>
+                            <th class="px-4 py-3 text-right bg-gray-50">Otros</th>
+                            <th class="px-4 py-3 text-right font-bold text-black bg-gray-50">Total</th>
                         </tr>
                     </thead>
                     <tbody id="tablaCuerpo" class="divide-y divide-gray-100">
@@ -80,17 +80,16 @@
 
     <script>
         // --- CONFIGURACIÓN ---
-        // ID extraído de tu enlace original: https://docs.google.com/spreadsheets/d/1X8iWRPzk6DAV7aNDoD2-n-Au4-VVzASSZ9hCgoixDD8/edit
+        // ID extraído de tu enlace original
         const SHEET_ID = '1X8iWRPzk6DAV7aNDoD2-n-Au4-VVzASSZ9hCgoixDD8';
-        const SHEET_NAME = 'Corte'; // Nombre de la hoja (asumimos que es la primera o se llama Corte)
+        const SHEET_NAME = 'Corte'; 
         
         let datosCrudos = [];
         let chartInstance = null;
         let modoActual = 'diario';
 
-        // 1. INICIAR CARGA (Usando el método rápido GVIZ)
+        // 1. INICIAR CARGA
         function cargarDatos() {
-            // Esta URL devuelve un JSONP que evita el bloqueo CORS
             const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:manejarRespuesta`;
             
             const script = document.createElement('script');
@@ -102,7 +101,7 @@
         // 2. PROCESAR DATOS DE GOOGLE
         window.manejarRespuesta = function(json) {
             const filas = json.table.rows;
-            const cols = json.table.cols; // Para verificar nombres si fuera necesario
+            const cols = json.table.cols; 
 
             datosCrudos = filas.map(fila => {
                 const c = fila.c;
@@ -110,24 +109,20 @@
 
                 // Parsear Fecha
                 let fecha = null;
-                const vFecha = c[0].v; // Valor de celda fecha
-                const fFecha = c[0].f; // Valor formateado (texto)
+                const vFecha = c[0].v; 
+                const fFecha = c[0].f; 
 
                 if (typeof vFecha === 'string' && vFecha.includes('Date')) {
-                    // Formato Date(2026, 0, 22)
                     const partes = vFecha.match(/Date\((\d+),(\d+),(\d+)\)/);
                     fecha = new Date(partes[1], partes[2], partes[3]);
                 } else if (typeof vFecha === 'string') {
-                    // Intentar parsear texto "22-01-26"
                     const partes = vFecha.split('-');
                     if (partes.length === 3) {
-                        // Asumimos DD-MM-AA
                         let anio = parseInt(partes[2]);
                         if (anio < 100) anio += 2000;
                         fecha = new Date(anio, parseInt(partes[1])-1, parseInt(partes[0]));
                     }
                 } else {
-                    // Es un timestamp
                     fecha = new Date(vFecha);
                 }
 
@@ -140,7 +135,6 @@
                 };
             }).filter(d => d !== null && !isNaN(d.fecha));
 
-            // Ordenar por fecha ascendente
             datosCrudos.sort((a, b) => a.fecha - b.fecha);
 
             document.getElementById('loading').classList.add('hidden');
@@ -150,21 +144,22 @@
         };
 
         // 3. LÓGICA DE FILTRADO Y AGREGACIÓN
-        function procesarDatosParaGrafico() {
+        // parametro 'completo': true para tabla (todos), false para grafico (limitado)
+        function procesarDatos(completo = false) {
+            let resultado = [];
+
             if (modoActual === 'diario') {
-                // Últimos 6 días
-                return datosCrudos.slice(-6).map(d => {
-                    // 1. Día de la semana (ej: "jue" -> "Jue")
+                resultado = datosCrudos.map(d => {
+                    // 1. Día de la semana 
                     let diaSem = d.fecha.toLocaleDateString('es-PE', { weekday: 'short' });
                     diaSem = diaSem.charAt(0).toUpperCase() + diaSem.slice(1).replace('.', '');
 
-                    // 2. Fecha (ej: "22/ene" -> "22/Ene")
+                    // 2. Fecha 
                     let mes = d.fecha.toLocaleDateString('es-PE', { month: 'short' });
                     mes = mes.charAt(0).toUpperCase() + mes.slice(1).replace('.', '');
                     const fechaDia = `${d.fecha.getDate()}/${mes}`;
 
                     return {
-                        // Chart.js interpreta arrays como líneas separadas en el Eje X
                         etiqueta: [diaSem, fechaDia], 
                         lectra: d.lectra,
                         manual: d.manual,
@@ -177,10 +172,8 @@
                 const mapaMeses = {};
                 
                 datosCrudos.forEach(d => {
-                    // Clave: 2026-01
                     const key = `${d.fecha.getFullYear()}-${d.fecha.getMonth()}`;
-                    let nombreMes = d.fecha.toLocaleDateString('es-PE', { month: 'short', year: '2-digit' }); // Ene 26
-                    // Capitalizar primera letra
+                    let nombreMes = d.fecha.toLocaleDateString('es-PE', { month: 'short', year: '2-digit' }); 
                     nombreMes = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
                     
                     if (!mapaMeses[key]) {
@@ -193,74 +186,79 @@
                     mapaMeses[key].total += d.total;
                 });
 
-                // Convertir a array, ordenar y tomar últimos 6
-                const arrayMeses = Object.values(mapaMeses).sort((a, b) => a.time - b.time);
-                return arrayMeses.slice(-6);
+                resultado = Object.values(mapaMeses).sort((a, b) => a.time - b.time);
+            }
+
+            if (completo) {
+                // Para la tabla devolvemos TODO el historial, invertido para ver lo más reciente arriba
+                return [...resultado].reverse();
+            } else {
+                // Para el gráfico solo los últimos 6
+                return resultado.slice(-6);
             }
         }
 
-        // 4. RENDERIZAR GRÁFICO
+        // 4. RENDERIZAR GRÁFICO Y TABLA
         function actualizarDashboard() {
-            const datosFinales = procesarDatosParaGrafico();
+            // A) Datos para Gráfico (Limitado a 6)
+            const datosGrafico = procesarDatos(false);
             
-            // 4.1 Renderizar Tabla inferior
+            // B) Datos para Tabla (Todos los que haya en el sheet)
+            const datosTabla = procesarDatos(true);
+            
+            // 4.1 Renderizar Tabla
             const tbody = document.getElementById('tablaCuerpo');
-            tbody.innerHTML = datosFinales.map(d => {
-                // Si la etiqueta es un array (multilínea), la unimos con espacio para la tabla
+            tbody.innerHTML = datosTabla.map(d => {
                 const labelTabla = Array.isArray(d.etiqueta) ? d.etiqueta.join(' ') : d.etiqueta;
-
                 return `
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-2 font-medium text-gray-700">${labelTabla}</td>
+                    <td class="px-4 py-2 font-medium text-gray-700 whitespace-nowrap">${labelTabla}</td>
                     <td class="px-4 py-2 text-right text-yellow-600">${d.lectra.toLocaleString()}</td>
                     <td class="px-4 py-2 text-right text-orange-600">${d.manual.toLocaleString()}</td>
                     <td class="px-4 py-2 text-right text-blue-600">${d.servicios.toLocaleString()}</td>
-                    <td class="px-4 py-2 text-right font-bold">${d.total.toLocaleString()}</td>
+                    <td class="px-4 py-2 text-right font-bold text-gray-900">${d.total.toLocaleString()}</td>
                 </tr>
             `}).join(''); 
 
-            // 4.2 Configurar Gráfico
+            // 4.2 Renderizar Gráfico
             const ctx = document.getElementById('miGrafico').getContext('2d');
             if (chartInstance) chartInstance.destroy();
 
-            // Config común para etiquetas dentro de la barra
             const labelsInner = {
                 color: 'white',
                 font: { weight: 'bold', size: 11 },
-                formatter: (val) => val > 0 ? val.toLocaleString() : '' // Formato miles y ocultar ceros
+                formatter: (val) => val > 0 ? val.toLocaleString() : '' 
             };
 
             chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: datosFinales.map(d => d.etiqueta),
+                    labels: datosGrafico.map(d => d.etiqueta),
                     datasets: [
                         {
                             label: 'Lectra',
-                            data: datosFinales.map(d => d.lectra),
-                            backgroundColor: '#eab308', // Amarillo oscuro
+                            data: datosGrafico.map(d => d.lectra),
+                            backgroundColor: '#eab308', 
                             stack: 'pila1',
-                            datalabels: { ...labelsInner, color: 'black' } // Texto negro en amarillo
+                            datalabels: { ...labelsInner, color: 'black' } 
                         },
                         {
                             label: 'Trozadora',
-                            data: datosFinales.map(d => d.manual),
-                            backgroundColor: '#f97316', // Naranja
+                            data: datosGrafico.map(d => d.manual),
+                            backgroundColor: '#f97316', 
                             stack: 'pila1',
                             datalabels: labelsInner
                         },
                         {
                             label: 'Otros',
-                            data: datosFinales.map(d => d.servicios),
-                            backgroundColor: '#2563eb', // Azul
+                            data: datosGrafico.map(d => d.servicios),
+                            backgroundColor: '#2563eb', 
                             stack: 'pila1',
                             datalabels: labelsInner
                         },
-                        // Dataset "Fantasma" invisible para mostrar el TOTAL
                         {
                             label: 'Total',
-                            // Usamos 0 en data para que NO sume altura a la pila
-                            data: datosFinales.map(() => 0), 
+                            data: datosGrafico.map(() => 0), 
                             backgroundColor: 'transparent',
                             borderColor: 'transparent',
                             stack: 'pila1', 
@@ -269,9 +267,8 @@
                                 anchor: 'end',
                                 color: '#333',
                                 font: { weight: 'bold', size: 12 },
-                                // Usamos el contexto para sacar el valor real del objeto original
-                                formatter: (val, ctx) => datosFinales[ctx.dataIndex].total.toLocaleString(),
-                                offset: -5 // Ajuste fino para pegarlo a la barra
+                                formatter: (val, ctx) => datosGrafico[ctx.dataIndex].total.toLocaleString(),
+                                offset: -5 
                             }
                         }
                     ]
@@ -281,20 +278,14 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     layout: {
-                        padding: {
-                            top: 5 // Reducido al mínimo para eliminar el espacio superior
-                        }
+                        padding: { top: 5 }
                     },
                     scales: {
                         x: { 
                             grid: { display: false },
-                            ticks: {
-                                font: {
-                                    weight: 'bold' // Eje X en negrita
-                                }
-                            }
+                            ticks: { font: { weight: 'bold' } }
                         },
-                        y: { display: false, stacked: true } // Eje Y oculto y apilado
+                        y: { display: false, stacked: true } 
                     },
                     plugins: {
                         legend: {
@@ -302,11 +293,11 @@
                             align: 'start',
                             labels: {
                                 usePointStyle: true,
-                                filter: (item) => item.text !== 'Total' // Ocultar leyenda del dataset fantasma
+                                filter: (item) => item.text !== 'Total' 
                             }
                         },
                         tooltip: {
-                            filter: (item) => item.datasetIndex !== 3 // No mostrar tooltip del fantasma
+                            filter: (item) => item.datasetIndex !== 3 
                         }
                     }
                 }
@@ -334,7 +325,6 @@
             actualizarDashboard();
         }
 
-        // Iniciar
         cargarDatos();
 
     </script>
