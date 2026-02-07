@@ -312,6 +312,26 @@ body {
   position: relative;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
+/* New Title Style for Graph */
+.graph-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-left: 10px;
+}
+.graph-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin: 0;
+}
+.graph-subtitle {
+    font-size: 14px;
+    color: #94a3b8;
+    margin: 0;
+}
+
 svg { overflow: visible; width: 100%; height: 100%; }
 .grid-line { stroke: #334155; stroke-dasharray: 4; }
 .graph-area { fill: rgba(56, 189, 248, 0.2); }
@@ -440,6 +460,9 @@ svg { overflow: visible; width: 100%; height: 100%; }
         </div>
         
         <h1>Reporte</h1>
+        <a href="index.html" class="nav-back-btn" title="Volver a Dashboard">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
         <span class="header-divider">|</span>
         <h2>Sala de Corte FC25AU5831 <span style="font-size: 14px; color: #64748b; display: block; margin-top: 5px;">(02/02 - 06/02)</span></h2>
     </div>
@@ -448,9 +471,6 @@ svg { overflow: visible; width: 100%; height: 100%; }
         <button class="tab-btn" onclick="openTab('estadistica', this)"><i class="fa-solid fa-chart-pie"></i><span class="mobile-hide"> Estad.</span></button>
         <button class="tab-btn" onclick="openTab('tiempos', this)"><i class="fa-solid fa-clock"></i><span class="mobile-hide"> Tiempos</span></button>
         <button class="tab-btn" onclick="openTab('acciones', this)"><i class="fa-solid fa-list-check"></i><span class="mobile-hide"> Acción</span></button>
-        <a href="index.html" class="nav-back-btn" title="Volver a Dashboard">
-            <i class="fa-solid fa-arrow-left"></i>
-        </a>
     </nav>
 </header>
 
@@ -465,38 +485,50 @@ svg { overflow: visible; width: 100%; height: 100%; }
             <div class="kpi-card">
                 <div style="display:flex; justify-content:space-between; width:100%;">
                     <i class="fa-solid fa-clock icon"></i>
-                    <span class="trend neutral">Semanal</span>
+                    <span class="trend neutral">Total Semana</span>
                 </div>
                 <span class="label">Horas Corte</span>
-                <span class="value">18.8 h</span>
+                <span class="value">18.78 h</span>
             </div>
+            
+            <!-- TARJETA EFICIENCIA OPERATIVA -->
             <div class="kpi-card">
                 <div style="display:flex; justify-content:space-between; width:100%;">
                     <i class="fa-solid fa-bolt icon" style="color: #f59e0b;"></i>
-                    <span class="trend up"><i class="fa-solid fa-arrow-up"></i> Pico</span>
+                    <span class="trend up" title="Sobre tiempo de sesión activa"><i class="fa-solid fa-circle-info"></i> Operativa</span>
                 </div>
-                <span class="label">Eficiencia Promedio</span>
+                <span class="label">Eficiencia (Sesión)</span>
                 <span class="value">56%</span>
             </div>
-            <div class="kpi-card">
+
+            <!-- NUEVA TARJETA TRE (24h) -->
+            <div class="kpi-card" style="border: 1px solid #38bdf8; background: rgba(56, 189, 248, 0.05);">
                 <div style="display:flex; justify-content:space-between; width:100%;">
-                    <i class="fa-solid fa-gauge-high icon" style="color: #22c55e;"></i>
-                    <span class="trend up"><i class="fa-solid fa-arrow-up"></i> Max</span>
+                    <i class="fa-solid fa-industry icon" style="color: #38bdf8;"></i>
+                    <span class="trend neutral" title="Sobre 24 horas totales"><i class="fa-solid fa-clock"></i> 24h Real</span>
                 </div>
-                <span class="label">Vel. Perímetro</span>
-                <span class="value">5.95 <small style="font-size:16px;">m/m</small></span>
+                <span class="label">TRE (Uso Total)</span>
+                <span class="value">15.6%</span>
             </div>
+
             <div class="kpi-card">
                 <div style="display:flex; justify-content:space-between; width:100%;">
-                    <i class="fa-solid fa-ruler-horizontal icon" style="color: #38bdf8;"></i>
-                    <span class="trend neutral">Estable</span>
+                    <i class="fa-solid fa-ruler-horizontal icon" style="color: #22c55e;"></i>
+                    <span class="trend neutral">Avg: 0.48</span>
                 </div>
                 <span class="label">Vel. Material</span>
-                <span class="value">0.50 <small style="font-size:16px;">m/m</small></span>
+                <span class="value">0.48 <small style="font-size:16px;">m/m</small></span>
             </div>
         </div>
 
         <div class="graph-container">
+            <div class="graph-header">
+                <div>
+                    <h4 class="graph-title">Evolución Diaria: Horas de Corte Neto</h4>
+                    <p class="graph-subtitle">Horas efectivas de corte por día (Objetivo > 5h)</p>
+                </div>
+                <div style="color: #38bdf8;"><i class="fa-solid fa-chart-area"></i></div>
+            </div>
             <svg viewBox="0 0 1000 300" preserveAspectRatio="none">
                 <line x1="0" y1="250" x2="1000" y2="250" stroke="#334155" stroke-width="1" />
                 <line x1="0" y1="150" x2="1000" y2="150" class="grid-line" />
@@ -517,61 +549,97 @@ svg { overflow: visible; width: 100%; height: 100%; }
                 <text x="700" y="110" fill="#fff" text-anchor="middle" font-weight="bold" font-size="24">3.80</text>
                 <text x="900" y="125" fill="#fff" text-anchor="middle" font-weight="bold" font-size="24">3.32</text>
                 
-                <text x="100" y="280" class="axis-text" text-anchor="middle" font-size="20">02</text>
-                <text x="300" y="280" class="axis-text" text-anchor="middle" font-size="20">03</text>
-                <text x="500" y="280" class="axis-text" text-anchor="middle" font-size="20">04</text>
-                <text x="700" y="280" class="axis-text" text-anchor="middle" font-size="20">05</text>
-                <text x="900" y="280" class="axis-text" text-anchor="middle" font-size="20">06</text>
+                <text x="100" y="280" class="axis-text" text-anchor="middle" font-size="16">Lun 02/Feb</text>
+                <text x="300" y="280" class="axis-text" text-anchor="middle" font-size="16">Mar 03/Feb</text>
+                <text x="500" y="280" class="axis-text" text-anchor="middle" font-size="16">Mié 04/Feb</text>
+                <text x="700" y="280" class="axis-text" text-anchor="middle" font-size="16">Jue 05/Feb</text>
+                <text x="900" y="280" class="axis-text" text-anchor="middle" font-size="16">Vie 06/Feb</text>
             </svg>
         </div>
     </div>
 
     <!-- 2. TAB: ESTADÍSTICA -->
     <div id="estadistica" class="tab-pane">
-        <h3 class="section-title">Variabilidad</h3>
+        <h3 class="section-title">Variabilidad Estadística</h3>
+        <p style="margin-bottom: 25px; color: #94a3b8;">Análisis comparativo de los indicadores clave durante la semana.</p>
         
-        <div class="stat-container-mobile" style="display: flex; gap: 30px; width: 100%;">
-            <!-- Efficiency Stats -->
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 20px;">
-                <h3 style="color: #f59e0b; border-bottom: 2px solid #f59e0b; padding-bottom: 10px; font-size: 20px; margin: 0;">Eficiencia (Corte Neto)</h3>
-                <div style="display: flex; gap: 15px;">
+        <div class="stat-container-mobile" style="display: flex; gap: 20px; width: 100%;">
+            
+            <!-- 1. Eficiencia Operativa Stats (Equipo) -->
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+                <h3 style="color: #f59e0b; border-bottom: 2px solid #f59e0b; padding-bottom: 10px; font-size: 18px; margin: 0;">
+                    <i class="fa-solid fa-users-gear"></i> Eficiencia Operativa
+                </h3>
+                <p style="font-size: 12px; color: #94a3b8; margin: 0;">(Corte Neto / Tiempo Sesión)</p>
+                
+                <div style="display: flex; gap: 10px;">
                     <div class="stat-box">
                         <div class="stat-title">Mín</div>
-                        <div class="stat-value">50%</div>
-                        <div class="stat-sub">Día 2</div>
+                        <div class="stat-value" style="color: #f59e0b;">50%</div>
+                        <div class="stat-sub">Lun 2/2</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-title">Max</div>
-                        <div class="stat-value">59%</div>
-                        <div class="stat-sub">Día 3</div>
+                        <div class="stat-value" style="color: #f59e0b;">59%</div>
+                        <div class="stat-sub">Mar 3/2</div>
                     </div>
                 </div>
-                <div class="stat-box" style="background: rgba(245, 158, 11, 0.1); border-color: #f59e0b;">
-                    <div class="stat-title">Promedio Semanal</div>
-                    <div class="stat-value" style="color: #f59e0b;">56%</div>
-                    <div class="stat-sub">Obj: >60%</div>
+                <div class="stat-box" style="background: rgba(245, 158, 11, 0.1); border-color: #f59e0b; padding: 15px;">
+                    <div class="stat-title">Promedio</div>
+                    <div class="stat-value" style="color: #fff; font-size: 24px;">56%</div>
+                    <div class="stat-sub">Estable</div>
                 </div>
             </div>
 
-            <!-- Speed Stats -->
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 20px;">
-                <h3 style="color: #38bdf8; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; font-size: 20px; margin: 0;">Velocidad (m/min)</h3>
-                <div style="display: flex; gap: 15px;">
+            <!-- 2. TRE Stats (Máquina 24h) - NUEVA COLUMNA -->
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+                <h3 style="color: #38bdf8; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; font-size: 18px; margin: 0;">
+                    <i class="fa-solid fa-industry"></i> TRE (Económica)
+                </h3>
+                <p style="font-size: 12px; color: #94a3b8; margin: 0;">(Corte Neto / 24 Horas)</p>
+
+                <div style="display: flex; gap: 10px;">
                     <div class="stat-box">
                         <div class="stat-title">Mín</div>
-                        <div class="stat-value">5.7</div>
-                        <div class="stat-sub">Día 5</div>
+                        <div class="stat-value" style="color: #38bdf8;">8.9%</div>
+                        <div class="stat-sub">Lun 2/2</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-title">Max</div>
-                        <div class="stat-value">6.3</div>
-                        <div class="stat-sub">Día 4</div>
+                        <div class="stat-value" style="color: #38bdf8;">20.5%</div>
+                        <div class="stat-sub">Mié 4/2</div>
                     </div>
                 </div>
-                <div class="stat-box" style="background: rgba(56, 189, 248, 0.1); border-color: #38bdf8;">
+                <div class="stat-box" style="background: rgba(56, 189, 248, 0.1); border-color: #38bdf8; padding: 15px;">
+                    <div class="stat-title">Promedio Global</div>
+                    <div class="stat-value" style="color: #fff; font-size: 24px;">15.6%</div>
+                    <div class="stat-sub">Capacidad Real</div>
+                </div>
+            </div>
+
+            <!-- 3. Speed Stats -->
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+                <h3 style="color: #22c55e; border-bottom: 2px solid #22c55e; padding-bottom: 10px; font-size: 18px; margin: 0;">
+                    <i class="fa-solid fa-gauge-high"></i> Velocidad (m/min)
+                </h3>
+                <p style="font-size: 12px; color: #94a3b8; margin: 0;">(Velocidad Perímetro)</p>
+
+                <div style="display: flex; gap: 10px;">
+                    <div class="stat-box">
+                        <div class="stat-title">Mín</div>
+                        <div class="stat-value" style="color: #22c55e;">5.70</div>
+                        <div class="stat-sub">Vie 6/2</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-title">Max</div>
+                        <div class="stat-value" style="color: #22c55e;">6.35</div>
+                        <div class="stat-sub">Mié 4/2</div>
+                    </div>
+                </div>
+                <div class="stat-box" style="background: rgba(34, 197, 94, 0.1); border-color: #22c55e; padding: 15px;">
                     <div class="stat-title">Promedio</div>
-                    <div class="stat-value" style="color: #38bdf8;">5.95</div>
-                    <div class="stat-sub">m/min</div>
+                    <div class="stat-value" style="color: #fff; font-size: 24px;">5.95</div>
+                    <div class="stat-sub">Objetivo > 6.0</div>
                 </div>
             </div>
         </div>
@@ -583,7 +651,7 @@ svg { overflow: visible; width: 100%; height: 100%; }
         <div class="chart-layout-split">
             <!-- Left: Breakdown Chart -->
             <div class="bar-chart-container" style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
-                
+                <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #cbd5e1;">Global</h3>
                 <div class="simple-bar-group">
                     <div class="simple-bar-label"><span>Corte Neto</span> <span>56%</span></div>
                     <div class="simple-bar-bg"><div class="simple-bar-fill" style="width: 56%; background: #22c55e;"></div></div>
@@ -605,18 +673,90 @@ svg { overflow: visible; width: 100%; height: 100%; }
                  <div style="background: #1e293b; padding: 20px; border-radius: 12px; border-left: 5px solid #22c55e;">
                     <span class="label" style="color: #94a3b8; font-size: 14px; text-transform: uppercase;">Estabilidad</span>
                     <p style="color: #cbd5e1; font-size: 16px; margin-top: 5px; line-height: 1.4;">
-                        Eficiencia estable <strong>55-59%</strong> excepto Lunes.
+                        Eficiencia estable <strong>55-59%</strong> excepto el 2/2.
                     </p>
                 </div>
                 
                  <div style="background: #1e293b; padding: 20px; border-radius: 12px; border-left: 5px solid #ef4444;">
                     <span class="label" style="color: #94a3b8; font-size: 14px; text-transform: uppercase;">Oportunidad</span>
                     <p style="color: #cbd5e1; font-size: 16px; margin-top: 5px; line-height: 1.4;">
-                        <strong>20% de tiempo perdido</strong> en interrupciones.
+                        <strong>20% de tiempo perdido</strong> (aprox 4h semanales) en interrupciones.
                     </p>
                 </div>
             </div>
         </div>
+
+        <h3 class="section-title" style="margin-top: 40px; border-top: 1px solid #334155; padding-top: 30px;">Comparativa por Turnos</h3>
+        
+        <!-- Turnos Cards -->
+        <div class="chart-layout-split" style="margin-bottom: 30px;">
+            <!-- Turno DIA (Verde) -->
+            <div class="kpi-card" style="border-top: 4px solid #22c55e;">
+                <div style="display:flex; justify-content:space-between; width:100%; margin-bottom: 15px;">
+                    <span class="label" style="color: #22c55e; font-weight: bold; font-size: 18px;"><i class="fa-solid fa-sun"></i> Turno Día</span>
+                    <span class="value" style="font-size: 24px;">71% <small style="font-size: 14px; color: #94a3b8;">Volumen</small></span>
+                </div>
+                <div class="simple-bar-group" style="width: 100%;">
+                    <div class="simple-bar-label"><span>Eficiencia</span></div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" style="width: 60%; background: #22c55e;"></div></div>
+                </div>
+                <div class="simple-bar-group" style="width: 100%;">
+                    <div class="simple-bar-label"><span>Tiempos Muertos</span> <span style="color: #ef4444;">16%</span></div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" style="width: 16%; background: #ef4444;"></div></div>
+                </div>
+            </div>
+
+            <!-- Turno NOCHE (Fuxia) -->
+            <div class="kpi-card" style="border-top: 4px solid #e879f9;">
+                <div style="display:flex; justify-content:space-between; width:100%; margin-bottom: 15px;">
+                    <span class="label" style="color: #e879f9; font-weight: bold; font-size: 18px;"><i class="fa-solid fa-moon"></i> Turno Noche</span>
+                    <span class="value" style="font-size: 24px;">29% <small style="font-size: 14px; color: #94a3b8;">Volumen</small></span>
+                </div>
+                <div class="simple-bar-group" style="width: 100%;">
+                    <div class="simple-bar-label"><span>Eficiencia</span></div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" style="width: 52%; background: #e879f9;"></div></div>
+                </div>
+                <div class="simple-bar-group" style="width: 100%;">
+                    <div class="simple-bar-label"><span>Tiempos Muertos</span> <span style="color: #ef4444;">24%</span></div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" style="width: 24%; background: #ef4444;"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Positioning Time Chart -->
+        <h3 class="section-title" style="font-size: 24px; margin-bottom: 20px;">Tiempo de Posicionamiento por Turno</h3>
+        <div class="graph-container" style="height: 250px;">
+            <svg viewBox="0 0 800 200" preserveAspectRatio="none">
+                <!-- Grid Lines -->
+                <line x1="100" y1="180" x2="100" y2="20" stroke="#334155" stroke-width="1"/>
+                <line x1="100" y1="180" x2="750" y2="180" stroke="#334155" stroke-width="1"/>
+                
+                <!-- Bars -->
+                <!-- Turno Dia (Green) - Value ~22% -->
+                <rect x="150" y="60" width="500" height="40" fill="#334155" rx="4" />
+                <rect x="150" y="60" width="110" height="40" fill="#22c55e" rx="4">
+                    <animate attributeName="width" from="0" to="110" duration="1s" fill="freeze" />
+                </rect>
+                <text x="120" y="85" fill="#fff" font-weight="bold" font-size="16" text-anchor="end">Día</text>
+                <text x="270" y="85" fill="#fff" font-size="16">22%</text>
+
+                <!-- Turno Noche (Fuchsia) - Value ~26% -->
+                <rect x="150" y="120" width="500" height="40" fill="#334155" rx="4" />
+                <rect x="150" y="120" width="130" height="40" fill="#e879f9" rx="4">
+                    <animate attributeName="width" from="0" to="130" duration="1s" fill="freeze" />
+                </rect>
+                <text x="120" y="145" fill="#fff" font-weight="bold" font-size="16" text-anchor="end">Noche</text>
+                <text x="290" y="145" fill="#fff" font-size="16">26%</text>
+
+                <!-- Scale -->
+                <text x="150" y="195" fill="#94a3b8" font-size="12" text-anchor="middle">0%</text>
+                <text x="275" y="195" fill="#94a3b8" font-size="12" text-anchor="middle">25%</text>
+                <text x="400" y="195" fill="#94a3b8" font-size="12" text-anchor="middle">50%</text>
+                <text x="525" y="195" fill="#94a3b8" font-size="12" text-anchor="middle">75%</text>
+                <text x="650" y="195" fill="#94a3b8" font-size="12" text-anchor="middle">100%</text>
+            </svg>
+        </div>
+
     </div>
 
     <!-- 4. TAB: ACCIONES -->
