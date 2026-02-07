@@ -300,7 +300,7 @@ body {
 .simple-bar-group { margin-bottom: 15px; }
 .simple-bar-label { display: flex; justify-content: space-between; margin-bottom: 5px; color: #e2e8f0; font-weight: 500; }
 .simple-bar-bg { background: #334155; height: 12px; border-radius: 6px; overflow: hidden; width: 100%; }
-.simple-bar-fill { height: 100%; border-radius: 6px; }
+.simple-bar-fill { height: 100%; border-radius: 6px; transition: width 1s ease-out; }
 
 .graph-container {
   width: 100%;
@@ -453,10 +453,10 @@ svg { overflow: visible; width: 100%; height: 100%; }
 <header class="main-header">
     <div class="header-branding">
         <div class="upload-wrapper">
-            <button class="upload-btn" onclick="document.getElementById('pdf-upload').click()" title="Cargar Reporte PDF">
-                <i class="fa-solid fa-file-pdf" id="upload-icon"></i>
+            <button class="upload-btn" onclick="document.getElementById('file-upload').click()" title="Cargar Reporte (PDF + Excel)">
+                <i class="fa-solid fa-cloud-arrow-up" id="upload-icon"></i>
             </button>
-            <input type="file" id="pdf-upload" accept="application/pdf" style="display: none;" onchange="handleFileUpload(this)">
+            <input type="file" id="file-upload" multiple accept=".pdf, .xlsx, .csv" style="display: none;" onchange="handleFileUpload(this)">
         </div>
         
         <h1>Reporte</h1>
@@ -488,7 +488,7 @@ svg { overflow: visible; width: 100%; height: 100%; }
                     <span class="trend neutral">Total Semana</span>
                 </div>
                 <span class="label">Horas Corte</span>
-                <span class="value">18.78 h</span>
+                <span class="value" id="kpi-horas">18.78 h</span>
             </div>
             
             <!-- TARJETA EFICIENCIA OPERATIVA -->
@@ -498,7 +498,7 @@ svg { overflow: visible; width: 100%; height: 100%; }
                     <span class="trend up" title="Sobre tiempo de sesión activa"><i class="fa-solid fa-circle-info"></i> Operativa</span>
                 </div>
                 <span class="label">Eficiencia (Sesión)</span>
-                <span class="value">56%</span>
+                <span class="value" id="kpi-eficiencia">56%</span>
             </div>
 
             <!-- NUEVA TARJETA TRE (24h) -->
@@ -508,7 +508,7 @@ svg { overflow: visible; width: 100%; height: 100%; }
                     <span class="trend neutral" title="Sobre 24 horas totales"><i class="fa-solid fa-clock"></i> 24h Real</span>
                 </div>
                 <span class="label">TRE (Uso Total)</span>
-                <span class="value">15.6%</span>
+                <span class="value" id="kpi-tre">15.6%</span>
             </div>
 
             <div class="kpi-card">
@@ -647,40 +647,89 @@ svg { overflow: visible; width: 100%; height: 100%; }
 
     <!-- 3. TAB: TIEMPOS -->
     <div id="tiempos" class="tab-pane">
-        <h3 class="section-title">Distribución Tiempos</h3>
+        <h3 class="section-title">Distribución Tiempos (Base Variable)</h3>
         <div class="chart-layout-split">
             <!-- Left: Breakdown Chart -->
-            <div class="bar-chart-container" style="background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155;">
-                <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #cbd5e1;">Global</h3>
+            <div class="bar-chart-container" style="background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; justify-content: flex-start; gap: 15px;">
+                <h3 id="capacity-title" style="margin: 0 0 15px 0; font-size: 16px; color: #94a3b8; text-transform: uppercase;">Capacidad Total (Calculando...)</h3>
+                
+                <!-- 1. Corte Neto -->
                 <div class="simple-bar-group">
-                    <div class="simple-bar-label"><span>Corte Neto</span> <span>56%</span></div>
-                    <div class="simple-bar-bg"><div class="simple-bar-fill" style="width: 56%; background: #22c55e;"></div></div>
+                    <div class="simple-bar-label">
+                        <span>Corte Neto</span> 
+                        <span><span id="t-neto-pct" style="color:#22c55e; font-weight:bold;">15.7%</span> <span id="t-neto-h" style="color:#64748b; font-size:14px;">[18.78h]</span></span>
+                    </div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-neto" style="width: 15.7%; background: #22c55e;"></div></div>
                 </div>
                 
+                <!-- 2. Introducción -->
                 <div class="simple-bar-group">
-                    <div class="simple-bar-label"><span>Posicionamiento</span> <span>24%</span></div>
-                    <div class="simple-bar-bg"><div class="simple-bar-fill" style="width: 24%; background: #38bdf8;"></div></div>
+                    <div class="simple-bar-label">
+                        <span>Introducción</span> 
+                        <span><span id="t-intro-pct" style="color:#94a3b8; font-weight:bold;">0.0%</span> <span id="t-intro-h" style="color:#64748b; font-size:14px;">[0.00h]</span></span>
+                    </div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-intro" style="width: 0%; background: #94a3b8;"></div></div>
                 </div>
 
+                <!-- 3. Posicionamiento -->
                 <div class="simple-bar-group">
-                    <div class="simple-bar-label"><span>Tiempos Muertos</span> <span>20%</span></div>
-                    <div class="simple-bar-bg"><div class="simple-bar-fill" style="width: 20%; background: #ef4444;"></div></div>
+                    <div class="simple-bar-label">
+                        <span>Posicionamiento</span> 
+                        <span><span id="t-pos-pct" style="color:#38bdf8; font-weight:bold;">16.4%</span> <span id="t-pos-h" style="color:#64748b; font-size:14px;">[19.71h]</span></span>
+                    </div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-pos" style="width: 16.4%; background: #38bdf8;"></div></div>
+                </div>
+
+                <!-- 4. Interrupción Recogida -->
+                <div class="simple-bar-group">
+                    <div class="simple-bar-label">
+                        <span>Int. Recogida</span> 
+                        <span><span id="t-rec-pct" style="color:#f59e0b; font-weight:bold;">0.0%</span> <span id="t-rec-h" style="color:#64748b; font-size:14px;">[0.00h]</span></span>
+                    </div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-rec" style="width: 0%; background: #f59e0b;"></div></div>
+                </div>
+
+                <!-- 5. Interrupción Otras -->
+                <div class="simple-bar-group">
+                    <div class="simple-bar-label">
+                        <span>Int. Otras Causas</span> 
+                        <span><span id="t-other-pct" style="color:#f97316; font-weight:bold;">5.9%</span> <span id="t-other-h" style="color:#64748b; font-size:14px;">[7.06h]</span></span>
+                    </div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-other" style="width: 5.9%; background: #f97316;"></div></div>
+                </div>
+
+                <!-- 6. Tiempo Muerto -->
+                <div class="simple-bar-group">
+                    <div class="simple-bar-label">
+                        <span>Tiempo Muerto</span> 
+                        <span><span id="t-dead-pct" style="color:#ef4444; font-weight:bold;">48.2%</span> <span id="t-dead-h" style="color:#64748b; font-size:14px;">[57.81h]</span></span>
+                    </div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-dead" style="width: 48.2%; background: #ef4444;"></div></div>
+                </div>
+
+                <!-- 7. Sin Uso (Calculated Remainder) -->
+                <div class="simple-bar-group">
+                    <div class="simple-bar-label">
+                        <span style="color:#64748b; font-style:italic;">Sin Uso (Capacidad Restante)</span> 
+                        <span><span id="t-unused-pct" style="color:#64748b; font-weight:bold;">13.8%</span> <span id="t-unused-h" style="color:#64748b; font-size:14px;">[16.64h]</span></span>
+                    </div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-unused" style="width: 13.8%; background: #475569;"></div></div>
                 </div>
             </div>
 
             <!-- Right: Analysis Text -->
             <div style="display: flex; flex-direction: column; justify-content: center; gap: 20px;">
-                 <div style="background: #1e293b; padding: 20px; border-radius: 12px; border-left: 5px solid #22c55e;">
-                    <span class="label" style="color: #94a3b8; font-size: 14px; text-transform: uppercase;">Estabilidad</span>
+                 <div style="background: #1e293b; padding: 20px; border-radius: 12px; border-left: 5px solid #ef4444;">
+                    <span class="label" style="color: #94a3b8; font-size: 14px; text-transform: uppercase;">Punto Crítico</span>
                     <p style="color: #cbd5e1; font-size: 16px; margin-top: 5px; line-height: 1.4;">
-                        Eficiencia estable <strong>55-59%</strong> excepto el 2/2.
+                        El <strong>Tiempo Muerto</strong> consume una gran parte de la capacidad total operativa calculada.
                     </p>
                 </div>
                 
-                 <div style="background: #1e293b; padding: 20px; border-radius: 12px; border-left: 5px solid #ef4444;">
+                 <div style="background: #1e293b; padding: 20px; border-radius: 12px; border-left: 5px solid #38bdf8;">
                     <span class="label" style="color: #94a3b8; font-size: 14px; text-transform: uppercase;">Oportunidad</span>
                     <p style="color: #cbd5e1; font-size: 16px; margin-top: 5px; line-height: 1.4;">
-                        <strong>20% de tiempo perdido</strong> (aprox 4h semanales) en interrupciones.
+                        Maximizar <strong>Posicionamiento + Corte Neto</strong> aumenta el valor agregado.
                     </p>
                 </div>
             </div>
@@ -803,35 +852,181 @@ svg { overflow: visible; width: 100%; height: 100%; }
         }
     }
 
-    // PDF Upload Simulation Logic
+    // PDF/Excel Upload Simulation Logic
     function handleFileUpload(input) {
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
+        if (input.files && input.files.length > 0) {
+            const count = input.files.length;
             const icon = document.getElementById('upload-icon');
             const mainContent = document.getElementById('main-content');
             
-            // 1. Change Icon to Loading Spinner
-            icon.classList.remove('fa-file-pdf');
+            // 1. Loading
+            icon.classList.remove('fa-cloud-arrow-up');
             icon.classList.add('fa-spinner', 'fa-spin');
             
-            // 2. Simulate Loading Delay (1.5 seconds)
-            setTimeout(() => {
-                // 3. Reset Icon
-                icon.classList.remove('fa-spinner', 'fa-spin');
-                icon.classList.add('fa-file-pdf');
-                
-                // 4. Show Success Toast
-                showToast(`Reporte cargado: ${file.name}`);
-                
-                // 5. Simulate Data Refresh (Fade effect)
-                mainContent.style.opacity = '0.5';
-                setTimeout(() => {
-                    mainContent.style.opacity = '1';
-                    // Here internal data would be updated if parser was connected
-                }, 300);
+            // 2. Find CSV file to read
+            let csvFile = null;
+            for(let i=0; i<input.files.length; i++) {
+                if(input.files[i].name.endsWith('.csv') || input.files[i].name.endsWith('.txt')) {
+                    csvFile = input.files[i];
+                    break;
+                }
+            }
 
-            }, 1500);
+            if (csvFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const csvText = e.target.result;
+                    const parsedData = parseCSV(csvText);
+                    
+                    // 3. Process after delay
+                    setTimeout(() => {
+                        icon.classList.remove('fa-spinner', 'fa-spin');
+                        icon.classList.add('fa-cloud-arrow-up');
+                        showToast(`Archivos cargados: ${count}`);
+                        
+                        updateDashboardWithParsedData(parsedData);
+                        
+                        mainContent.style.opacity = '0.5';
+                        setTimeout(() => { mainContent.style.opacity = '1'; }, 300);
+                    }, 1500);
+                };
+                reader.readAsText(csvFile);
+            } else {
+                // Fallback if only PDF or no CSV (Simulation with default 5 days)
+                setTimeout(() => {
+                    icon.classList.remove('fa-spinner', 'fa-spin');
+                    icon.classList.add('fa-cloud-arrow-up');
+                    showToast(`Archivos cargados: ${count}`);
+                    // Use default hardcoded update if no CSV read
+                    updateDashboardWithDefaultData();
+                    mainContent.style.opacity = '0.5';
+                    setTimeout(() => { mainContent.style.opacity = '1'; }, 300);
+                }, 1500);
+            }
         }
+    }
+
+    function parseCSV(csvText) {
+        const lines = csvText.trim().split('\n');
+        // Simple parser
+        const headers = lines[0].split(',').map(h => h.trim());
+        const data = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+            // Handle potential empty lines
+            if (!lines[i].trim()) continue;
+            
+            const row = lines[i].split(',').map(c => c.trim());
+            if (row.length < headers.length) continue; // Skip incomplete rows
+            
+            const obj = {};
+            headers.forEach((h, index) => {
+                obj[h] = row[index];
+            });
+            data.push(obj);
+        }
+        return data;
+    }
+
+    function updateDashboardWithParsedData(data) {
+        // 1. Calculate Totals
+        let totalNeto = 0;
+        let totalIntro = 0;
+        let totalPos = 0;
+        let totalRecogida = 0;
+        let totalOtras = 0;
+        let totalMuerto = 0;
+        const uniqueDates = new Set();
+
+        data.forEach(row => {
+            // Helper to parse numbers safely
+            const parse = val => parseFloat(val) || 0;
+            
+            totalNeto += parse(row['Tiempo de corte neto']);
+            totalIntro += parse(row['Tiempo de introducción']);
+            totalPos += parse(row['Tiempo de posicionamiento']);
+            totalRecogida += parse(row['Tiempo de interrupción para recogida']);
+            totalOtras += parse(row['Tiempo de interrupción otras causas']);
+            totalMuerto += parse(row['Tiempo muerto']);
+            
+            if (row['Fecha']) uniqueDates.add(row['Fecha']);
+        });
+
+        // 2. Calculate Capacity dynamically based on days present
+        let totalCapacity = 0;
+        uniqueDates.forEach(dateStr => {
+            // Handle simple date string "YYYY-MM-DD" safely
+            const parts = dateStr.split('-');
+            if(parts.length === 3) {
+                // Create date using local time constructor to avoid timezone shifts
+                const date = new Date(parts[0], parts[1]-1, parts[2]); 
+                const day = date.getDay(); // 0 Sun, 6 Sat
+                
+                if (day === 6) { 
+                    totalCapacity += 16; // Saturday
+                } else if (day >= 1 && day <= 5) {
+                    totalCapacity += 24; // Mon-Fri
+                } else {
+                    totalCapacity += 24; // Default/Sunday assumption if present (usually not)
+                }
+            }
+        });
+        
+        // Fallback if no dates found (should not happen with valid csv)
+        if (totalCapacity === 0) totalCapacity = 120;
+
+        // 3. Calculate Percentages
+        const getPct = (val) => ((val / totalCapacity) * 100).toFixed(1);
+        
+        const usedTotal = totalNeto + totalIntro + totalPos + totalRecogida + totalOtras + totalMuerto;
+        const unusedTotal = totalCapacity - usedTotal;
+        
+        // 4. Update UI
+        // Title
+        document.getElementById('capacity-title').innerText = `Capacidad Total (${totalCapacity}h - ${uniqueDates.size} Días)`;
+
+        // Update Bars
+        updateBar('neto', totalNeto, getPct(totalNeto));
+        updateBar('intro', totalIntro, getPct(totalIntro));
+        updateBar('pos', totalPos, getPct(totalPos));
+        updateBar('rec', totalRecogida, getPct(totalRecogida));
+        updateBar('other', totalOtras, getPct(totalOtras));
+        updateBar('dead', totalMuerto, getPct(totalMuerto));
+        
+        // Unused
+        const unusedPct = getPct(unusedTotal > 0 ? unusedTotal : 0);
+        const unusedVal = unusedTotal > 0 ? unusedTotal.toFixed(2) : "0.00";
+        updateBar('unused', unusedVal, unusedPct);
+
+        // Update KPIs in Resumen
+        if(document.getElementById('kpi-horas')) 
+            document.getElementById('kpi-horas').innerText = `${totalNeto.toFixed(2)} h`;
+            
+        console.log("Dashboard updated with dynamic capacity:", totalCapacity);
+    }
+
+    function updateBar(idSuffix, hours, pct) {
+        // Ensure hours is a number
+        const h = parseFloat(hours).toFixed(2);
+        const elPct = document.getElementById(`t-${idSuffix}-pct`);
+        const elH = document.getElementById(`t-${idSuffix}-h`);
+        const elBar = document.getElementById(`bar-${idSuffix}`);
+        
+        if(elPct) elPct.innerText = `${pct}%`;
+        if(elH) elH.innerText = `[${h}h]`;
+        if(elBar) elBar.style.width = `${Math.max(pct, 0)}%`; // prevent negative width
+    }
+
+    // Default Fallback (Same as before, fixed 120h)
+    function updateDashboardWithDefaultData() {
+        const data = [
+            {'Fecha': '2026-02-02', 'Tiempo de corte neto': 2.16, 'Tiempo muerto': 7.36, 'Tiempo de posicionamiento': 3.75, 'Tiempo de interrupción otras causas': 1.35},
+            {'Fecha': '2026-02-03', 'Tiempo de corte neto': 4.59, 'Tiempo muerto': 13.92, 'Tiempo de posicionamiento': 4.21, 'Tiempo de interrupción otras causas': 0.9},
+            {'Fecha': '2026-02-04', 'Tiempo de corte neto': 4.91, 'Tiempo muerto': 12.48, 'Tiempo de posicionamiento': 4.19, 'Tiempo de interrupción otras causas': 1.17},
+            {'Fecha': '2026-02-05', 'Tiempo de corte neto': 3.8, 'Tiempo muerto': 13.29, 'Tiempo de posicionamiento': 4.04, 'Tiempo de interrupción otras causas': 2.76},
+            {'Fecha': '2026-02-06', 'Tiempo de corte neto': 3.32, 'Tiempo muerto': 10.76, 'Tiempo de posicionamiento': 3.52, 'Tiempo de interrupción otras causas': 0.88}
+        ];
+        updateDashboardWithParsedData(data);
     }
 
     function showToast(message) {
@@ -846,6 +1041,11 @@ svg { overflow: visible; width: 100%; height: 100%; }
             toast.classList.remove('show');
         }, 3000);
     }
+    
+    // Initialize with default data on load
+    window.onload = function() {
+       updateDashboardWithDefaultData();
+    };
 </script>
 
 </body>
