@@ -464,7 +464,7 @@ svg { overflow: visible; width: 100%; height: 100%; }
             <i class="fa-solid fa-arrow-left"></i>
         </a>
         <span class="header-divider">|</span>
-        <h2>Sala de Corte FC25AU5831 <span style="font-size: 14px; color: #64748b; display: block; margin-top: 5px;">(02/02 - 06/02)</span></h2>
+        <h2>Sala de Corte FC25AU5831 <span style="font-size: 14px; color: #64748b; display: block; margin-top: 5px;">(02/02 - 08/02)</span></h2>
     </div>
     <nav class="tabs-nav">
         <button class="tab-btn active" onclick="openTab('resumen', this)"><i class="fa-solid fa-layer-group"></i><span class="mobile-hide"> Resumen</span></button>
@@ -488,7 +488,7 @@ svg { overflow: visible; width: 100%; height: 100%; }
                     <span class="trend neutral">Total Semana</span>
                 </div>
                 <span class="label">Horas Corte</span>
-                <span class="value" id="kpi-horas">18.78 h</span>
+                <span class="value" id="kpi-horas">22.42 h</span>
             </div>
             
             <!-- TARJETA EFICIENCIA OPERATIVA -->
@@ -505,10 +505,10 @@ svg { overflow: visible; width: 100%; height: 100%; }
             <div class="kpi-card" style="border: 1px solid #38bdf8; background: rgba(56, 189, 248, 0.05);">
                 <div style="display:flex; justify-content:space-between; width:100%;">
                     <i class="fa-solid fa-industry icon" style="color: #38bdf8;"></i>
-                    <span class="trend neutral" title="Sobre 24 horas totales"><i class="fa-solid fa-clock"></i> 24h Real</span>
+                    <span class="trend neutral" title="Sobre capacidad instalada"><i class="fa-solid fa-clock"></i> Capacidad</span>
                 </div>
                 <span class="label">TRE (Uso Total)</span>
-                <span class="value" id="kpi-tre">15.6%</span>
+                <span class="value" id="kpi-tre">14.6%</span>
             </div>
 
             <div class="kpi-card">
@@ -525,7 +525,7 @@ svg { overflow: visible; width: 100%; height: 100%; }
             <div class="graph-header">
                 <div>
                     <h4 class="graph-title">Evolución Diaria: Horas de Corte Neto</h4>
-                    <p class="graph-subtitle">Horas efectivas de corte por día (Objetivo > 5h)</p>
+                    <p class="graph-subtitle">Horas efectivas de corte por día</p>
                 </div>
                 <div style="color: #38bdf8;"><i class="fa-solid fa-chart-area"></i></div>
             </div>
@@ -534,26 +534,32 @@ svg { overflow: visible; width: 100%; height: 100%; }
                 <line x1="0" y1="150" x2="1000" y2="150" class="grid-line" />
                 <line x1="0" y1="50" x2="1000" y2="50" class="grid-line" />
                 
-                <path class="graph-area" d="M100,250 L100,178 L300,97 L500,86 L700,123 L900,139 L900,250 Z" />
-                <path class="graph-line" d="M100,178 L300,97 L500,86 L700,123 L900,139" />
+                <path class="graph-area" d="M100,250 L100,178 L233,97 L366,86 L500,123 L633,125 L766,155 L900,223 L900,250 Z" />
+                <path class="graph-line" d="M100,178 L233,97 L366,86 L500,123 L633,125 L766,155 L900,223" />
                 
-                <circle cx="100" cy="178" r="8" fill="#38bdf8" />
-                <circle cx="300" cy="97" r="8" fill="#38bdf8" />
-                <circle cx="500" cy="86" r="8" fill="#38bdf8" />
-                <circle cx="700" cy="123" r="8" fill="#38bdf8" />
-                <circle cx="900" cy="139" r="8" fill="#38bdf8" />
+                <circle cx="100" cy="178" r="6" fill="#38bdf8" />
+                <circle cx="233" cy="97" r="6" fill="#38bdf8" />
+                <circle cx="366" cy="86" r="6" fill="#38bdf8" />
+                <circle cx="500" cy="123" r="6" fill="#38bdf8" />
+                <circle cx="633" cy="125" r="6" fill="#38bdf8" />
+                <circle cx="766" cy="155" r="6" fill="#38bdf8" />
+                <circle cx="900" cy="223" r="6" fill="#38bdf8" />
 
-                <text x="100" y="165" fill="#fff" text-anchor="middle" font-weight="bold" font-size="24">2.16</text>
-                <text x="300" y="85" fill="#fff" text-anchor="middle" font-weight="bold" font-size="24">4.59</text>
-                <text x="500" y="75" fill="#fff" text-anchor="middle" font-weight="bold" font-size="24">4.91</text>
-                <text x="700" y="110" fill="#fff" text-anchor="middle" font-weight="bold" font-size="24">3.80</text>
-                <text x="900" y="125" fill="#fff" text-anchor="middle" font-weight="bold" font-size="24">3.32</text>
+                <text x="100" y="165" fill="#fff" text-anchor="middle" font-weight="bold" font-size="18">2.16</text>
+                <text x="233" y="85" fill="#fff" text-anchor="middle" font-weight="bold" font-size="18">4.59</text>
+                <text x="366" y="75" fill="#fff" text-anchor="middle" font-weight="bold" font-size="18">4.91</text>
+                <text x="500" y="110" fill="#fff" text-anchor="middle" font-weight="bold" font-size="18">3.80</text>
+                <text x="633" y="115" fill="#fff" text-anchor="middle" font-weight="bold" font-size="18">3.73</text>
+                <text x="766" y="145" fill="#fff" text-anchor="middle" font-weight="bold" font-size="18">2.84</text>
+                <text x="900" y="210" fill="#fff" text-anchor="middle" font-weight="bold" font-size="18">0.80</text>
                 
-                <text x="100" y="280" class="axis-text" text-anchor="middle" font-size="16">Lun 02/Feb</text>
-                <text x="300" y="280" class="axis-text" text-anchor="middle" font-size="16">Mar 03/Feb</text>
-                <text x="500" y="280" class="axis-text" text-anchor="middle" font-size="16">Mié 04/Feb</text>
-                <text x="700" y="280" class="axis-text" text-anchor="middle" font-size="16">Jue 05/Feb</text>
-                <text x="900" y="280" class="axis-text" text-anchor="middle" font-size="16">Vie 06/Feb</text>
+                <text x="100" y="280" class="axis-text" text-anchor="middle" font-size="14">Lun 02</text>
+                <text x="233" y="280" class="axis-text" text-anchor="middle" font-size="14">Mar 03</text>
+                <text x="366" y="280" class="axis-text" text-anchor="middle" font-size="14">Mié 04</text>
+                <text x="500" y="280" class="axis-text" text-anchor="middle" font-size="14">Jue 05</text>
+                <text x="633" y="280" class="axis-text" text-anchor="middle" font-size="14">Vie 06</text>
+                <text x="766" y="280" class="axis-text" text-anchor="middle" font-size="14">Sáb 07</text>
+                <text x="900" y="280" class="axis-text" text-anchor="middle" font-size="14">Dom 08</text>
             </svg>
         </div>
     </div>
@@ -596,13 +602,13 @@ svg { overflow: visible; width: 100%; height: 100%; }
                 <h3 style="color: #38bdf8; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; font-size: 18px; margin: 0;">
                     <i class="fa-solid fa-industry"></i> TRE (Uso Total) 24h Real
                 </h3>
-                <p style="font-size: 12px; color: #94a3b8; margin: 0;">(Corte Neto / 24 Horas)</p>
+                <p style="font-size: 12px; color: #94a3b8; margin: 0;">(Corte Neto / Capacidad Diaria)</p>
 
                 <div style="display: flex; gap: 10px;">
                     <div class="stat-box">
                         <div class="stat-title">Mín</div>
-                        <div class="stat-value" style="color: #38bdf8;">8.9%</div>
-                        <div class="stat-sub">Lun 2/2</div>
+                        <div class="stat-value" style="color: #38bdf8;">8.0%</div>
+                        <div class="stat-sub">Dom 8/2</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-title">Max</div>
@@ -612,7 +618,7 @@ svg { overflow: visible; width: 100%; height: 100%; }
                 </div>
                 <div class="stat-box" style="background: rgba(56, 189, 248, 0.1); border-color: #38bdf8; padding: 15px;">
                     <div class="stat-title">Promedio Global</div>
-                    <div class="stat-value" style="color: #fff; font-size: 24px;">15.6%</div>
+                    <div class="stat-value" style="color: #fff; font-size: 24px;">14.6%</div>
                     <div class="stat-sub">Capacidad Real</div>
                 </div>
             </div>
@@ -627,13 +633,13 @@ svg { overflow: visible; width: 100%; height: 100%; }
                 <div style="display: flex; gap: 10px;">
                     <div class="stat-box">
                         <div class="stat-title">Mín</div>
-                        <div class="stat-value" style="color: #22c55e;">5.70</div>
-                        <div class="stat-sub">Vie 6/2</div>
+                        <div class="stat-value" style="color: #22c55e;">5.34</div>
+                        <div class="stat-sub">Sáb 7/2</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-title">Max</div>
-                        <div class="stat-value" style="color: #22c55e;">6.35</div>
-                        <div class="stat-sub">Mié 4/2</div>
+                        <div class="stat-value" style="color: #22c55e;">6.37</div>
+                        <div class="stat-sub">Vie 6/2</div>
                     </div>
                 </div>
                 <div class="stat-box" style="background: rgba(34, 197, 94, 0.1); border-color: #22c55e; padding: 15px;">
@@ -654,16 +660,16 @@ svg { overflow: visible; width: 100%; height: 100%; }
                 <h3 id="capacity-title" style="margin: 0 0 15px 0; font-size: 16px; color: #94a3b8; text-transform: uppercase;">Capacidad Total (Calculando...)</h3>
                 
                 <!-- 1. Corte Neto -->
-                <div class="simple-bar-group">
+                <div class="simple-bar-group" id="group-neto">
                     <div class="simple-bar-label">
                         <span>Corte Neto</span> 
-                        <span><span id="t-neto-pct" style="color:#22c55e; font-weight:bold;">15.7%</span> <span id="t-neto-h" style="color:#64748b; font-size:14px;">[18.78h]</span></span>
+                        <span><span id="t-neto-pct" style="color:#22c55e; font-weight:bold;">14.6%</span> <span id="t-neto-h" style="color:#64748b; font-size:14px;">[22.42h]</span></span>
                     </div>
-                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-neto" style="width: 15.7%; background: #22c55e;"></div></div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-neto" style="width: 14.6%; background: #22c55e;"></div></div>
                 </div>
                 
                 <!-- 2. Introducción -->
-                <div class="simple-bar-group">
+                <div class="simple-bar-group" id="group-intro">
                     <div class="simple-bar-label">
                         <span>Introducción</span> 
                         <span><span id="t-intro-pct" style="color:#94a3b8; font-weight:bold;">0.0%</span> <span id="t-intro-h" style="color:#64748b; font-size:14px;">[0.00h]</span></span>
@@ -672,16 +678,16 @@ svg { overflow: visible; width: 100%; height: 100%; }
                 </div>
 
                 <!-- 3. Posicionamiento -->
-                <div class="simple-bar-group">
+                <div class="simple-bar-group" id="group-pos">
                     <div class="simple-bar-label">
                         <span>Posicionamiento</span> 
-                        <span><span id="t-pos-pct" style="color:#38bdf8; font-weight:bold;">16.4%</span> <span id="t-pos-h" style="color:#64748b; font-size:14px;">[19.71h]</span></span>
+                        <span><span id="t-pos-pct" style="color:#38bdf8; font-weight:bold;">16.7%</span> <span id="t-pos-h" style="color:#64748b; font-size:14px;">[25.77h]</span></span>
                     </div>
-                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-pos" style="width: 16.4%; background: #38bdf8;"></div></div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-pos" style="width: 16.7%; background: #38bdf8;"></div></div>
                 </div>
 
                 <!-- 4. Interrupción Recogida -->
-                <div class="simple-bar-group">
+                <div class="simple-bar-group" id="group-rec">
                     <div class="simple-bar-label">
                         <span>Int. Recogida</span> 
                         <span><span id="t-rec-pct" style="color:#f59e0b; font-weight:bold;">0.0%</span> <span id="t-rec-h" style="color:#64748b; font-size:14px;">[0.00h]</span></span>
@@ -690,30 +696,30 @@ svg { overflow: visible; width: 100%; height: 100%; }
                 </div>
 
                 <!-- 5. Interrupción Otras -->
-                <div class="simple-bar-group">
+                <div class="simple-bar-group" id="group-other">
                     <div class="simple-bar-label">
                         <span>Int. Otras Causas</span> 
-                        <span><span id="t-other-pct" style="color:#f97316; font-weight:bold;">5.9%</span> <span id="t-other-h" style="color:#64748b; font-size:14px;">[7.06h]</span></span>
+                        <span><span id="t-other-pct" style="color:#f97316; font-weight:bold;">6.1%</span> <span id="t-other-h" style="color:#64748b; font-size:14px;">[9.49h]</span></span>
                     </div>
-                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-other" style="width: 5.9%; background: #f97316;"></div></div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-other" style="width: 6.1%; background: #f97316;"></div></div>
                 </div>
 
                 <!-- 6. Tiempo Muerto -->
-                <div class="simple-bar-group">
+                <div class="simple-bar-group" id="group-dead">
                     <div class="simple-bar-label">
                         <span>Tiempo Muerto</span> 
-                        <span><span id="t-dead-pct" style="color:#ef4444; font-weight:bold;">48.2%</span> <span id="t-dead-h" style="color:#64748b; font-size:14px;">[57.81h]</span></span>
+                        <span><span id="t-dead-pct" style="color:#ef4444; font-weight:bold;">43.6%</span> <span id="t-dead-h" style="color:#64748b; font-size:14px;">[67.15h]</span></span>
                     </div>
-                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-dead" style="width: 48.2%; background: #ef4444;"></div></div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-dead" style="width: 43.6%; background: #ef4444;"></div></div>
                 </div>
 
                 <!-- 7. Sin Uso (Calculated Remainder) -->
-                <div class="simple-bar-group">
+                <div class="simple-bar-group" id="group-unused">
                     <div class="simple-bar-label">
                         <span style="color:#64748b; font-style:italic;">Sin Uso (Capacidad Restante)</span> 
-                        <span><span id="t-unused-pct" style="color:#64748b; font-weight:bold;">13.8%</span> <span id="t-unused-h" style="color:#64748b; font-size:14px;">[16.64h]</span></span>
+                        <span><span id="t-unused-pct" style="color:#64748b; font-weight:bold;">19.0%</span> <span id="t-unused-h" style="color:#64748b; font-size:14px;">[29.17h]</span></span>
                     </div>
-                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-unused" style="width: 13.8%; background: #475569;"></div></div>
+                    <div class="simple-bar-bg"><div class="simple-bar-fill" id="bar-unused" style="width: 19.0%; background: #475569;"></div></div>
                 </div>
             </div>
 
@@ -722,14 +728,14 @@ svg { overflow: visible; width: 100%; height: 100%; }
                  <div style="background: #1e293b; padding: 20px; border-radius: 12px; border-left: 5px solid #ef4444;">
                     <span class="label" style="color: #94a3b8; font-size: 14px; text-transform: uppercase;">Punto Crítico</span>
                     <p style="color: #cbd5e1; font-size: 16px; margin-top: 5px; line-height: 1.4;">
-                        El <strong>Tiempo Muerto</strong> consume una gran parte de la capacidad total operativa calculada.
+                        El <strong>Tiempo Muerto (43.6%)</strong> sigue siendo el factor principal de pérdida de capacidad.
                     </p>
                 </div>
                 
                  <div style="background: #1e293b; padding: 20px; border-radius: 12px; border-left: 5px solid #38bdf8;">
                     <span class="label" style="color: #94a3b8; font-size: 14px; text-transform: uppercase;">Oportunidad</span>
                     <p style="color: #cbd5e1; font-size: 16px; margin-top: 5px; line-height: 1.4;">
-                        Maximizar <strong>Posicionamiento + Corte Neto</strong> aumenta el valor agregado.
+                        La capacidad "Sin Uso" es del <strong>19.0%</strong>, indicando espacio para más carga de trabajo.
                     </p>
                 </div>
             </div>
@@ -962,18 +968,18 @@ svg { overflow: visible; width: 100%; height: 100%; }
                 const date = new Date(parts[0], parts[1]-1, parts[2]); 
                 const day = date.getDay(); // 0 Sun, 6 Sat
                 
-                if (day === 6) { 
-                    totalCapacity += 16; // Saturday
-                } else if (day >= 1 && day <= 5) {
-                    totalCapacity += 24; // Mon-Fri
-                } else {
-                    totalCapacity += 24; // Default/Sunday assumption if present (usually not)
+                if (day === 0) { // Sunday
+                    totalCapacity += 10; 
+                } else if (day === 6) { // Saturday
+                    totalCapacity += 24;
+                } else { // Mon-Fri
+                    totalCapacity += 24; 
                 }
             }
         });
         
         // Fallback if no dates found (should not happen with valid csv)
-        if (totalCapacity === 0) totalCapacity = 120;
+        if (totalCapacity === 0) totalCapacity = 154; // Default full week (5*24 + 24 + 10)
 
         // 3. Calculate Percentages
         const getPct = (val) => ((val / totalCapacity) * 100).toFixed(1);
@@ -1001,6 +1007,9 @@ svg { overflow: visible; width: 100%; height: 100%; }
         // Update KPIs in Resumen
         if(document.getElementById('kpi-horas')) 
             document.getElementById('kpi-horas').innerText = `${totalNeto.toFixed(2)} h`;
+        
+        if(document.getElementById('kpi-tre'))
+            document.getElementById('kpi-tre').innerText = `${getPct(totalNeto)}%`;
             
         console.log("Dashboard updated with dynamic capacity:", totalCapacity);
     }
@@ -1015,16 +1024,28 @@ svg { overflow: visible; width: 100%; height: 100%; }
         if(elPct) elPct.innerText = `${pct}%`;
         if(elH) elH.innerText = `[${h}h]`;
         if(elBar) elBar.style.width = `${Math.max(pct, 0)}%`; // prevent negative width
+
+        // Hide if value is 0
+        const group = document.getElementById(`group-${idSuffix}`);
+        if(group) {
+            if(parseFloat(hours) === 0) {
+                group.style.display = 'none';
+            } else {
+                group.style.display = 'block';
+            }
+        }
     }
 
-    // Default Fallback (Same as before, fixed 120h)
+    // Default Fallback (Updated with 7 days data)
     function updateDashboardWithDefaultData() {
         const data = [
             {'Fecha': '2026-02-02', 'Tiempo de corte neto': 2.16, 'Tiempo muerto': 7.36, 'Tiempo de posicionamiento': 3.75, 'Tiempo de interrupción otras causas': 1.35},
             {'Fecha': '2026-02-03', 'Tiempo de corte neto': 4.59, 'Tiempo muerto': 13.92, 'Tiempo de posicionamiento': 4.21, 'Tiempo de interrupción otras causas': 0.9},
             {'Fecha': '2026-02-04', 'Tiempo de corte neto': 4.91, 'Tiempo muerto': 12.48, 'Tiempo de posicionamiento': 4.19, 'Tiempo de interrupción otras causas': 1.17},
             {'Fecha': '2026-02-05', 'Tiempo de corte neto': 3.8, 'Tiempo muerto': 13.29, 'Tiempo de posicionamiento': 4.04, 'Tiempo de interrupción otras causas': 2.76},
-            {'Fecha': '2026-02-06', 'Tiempo de corte neto': 3.32, 'Tiempo muerto': 10.76, 'Tiempo de posicionamiento': 3.52, 'Tiempo de interrupción otras causas': 0.88}
+            {'Fecha': '2026-02-06', 'Tiempo de corte neto': 3.73, 'Tiempo muerto': 14.61, 'Tiempo de posicionamiento': 3.98, 'Tiempo de interrupción otras causas': 0.92},
+            {'Fecha': '2026-02-07', 'Tiempo de corte neto': 2.84, 'Tiempo muerto': 7.7, 'Tiempo de posicionamiento': 4.71, 'Tiempo de interrupción otras causas': 1.99},
+            {'Fecha': '2026-02-08', 'Tiempo de corte neto': 0.8, 'Tiempo muerto': 4.79, 'Tiempo de posicionamiento': 1.35, 'Tiempo de interrupción otras causas': 0.44}
         ];
         updateDashboardWithParsedData(data);
     }
