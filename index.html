@@ -4,27 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Producción</title>
-    <!-- Tailwind CSS para diseño moderno y rápido -->
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
     <!-- Chart.js y Plugin de Etiquetas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    
+
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #f1f5f9; }
-        .chart-container { position: relative; height: 50vh; width: 100%; min-height: 300px; }
-        .loader {
-            border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%;
-            width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto;
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #f1f5f9;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .scissors-icon { transform: rotate(-45deg); }
+
+        .chart-container {
+            position: relative;
+            height: 56vh;
+            width: 100%;
+            min-height: 360px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .scissors-icon {
+            transform: rotate(-45deg);
+        }
     </style>
 </head>
+
 <body class="p-4 md:p-6">
 
     <div class="max-w-4xl mx-auto space-y-6">
-        
+
         <!-- ENCABEZADO Y CONTROLES -->
         <div class="bg-white p-4 rounded-xl shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
             <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -35,8 +60,7 @@
                 </a>
                 Prod. Corte Pzas
             </h1>
-            
-            <!-- Botones de Filtro -->
+
             <div class="flex items-center gap-3">
                 <div class="flex bg-gray-100 p-1 rounded-lg">
                     <button onclick="cambiarModo('diario')" id="btnDiario" class="px-4 py-2 text-sm font-semibold rounded-md shadow-sm bg-white text-blue-600 transition-all">
@@ -55,18 +79,19 @@
                 <div class="loader"></div>
                 <p class="text-gray-500 text-sm">Conectando con Google Sheets...</p>
             </div>
-            
+
             <div class="chart-container hidden" id="chartWrapper">
                 <canvas id="miGrafico"></canvas>
             </div>
         </div>
 
-        <!-- RESUMEN (TABLA) -->
+        <!-- RESUMEN TABLA -->
         <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
             <div class="bg-blue-600 px-4 py-3 border-b border-blue-700">
                 <h3 class="text-white font-semibold text-sm">Últimos Datos Cargados (Historial Completo)</h3>
             </div>
-            <div class="overflow-x-auto max-h-96"> <!-- Scroll si hay muchos datos -->
+
+            <div class="overflow-x-auto max-h-96">
                 <table class="w-full text-sm text-left relative">
                     <thead class="bg-gray-50 text-gray-600 uppercase text-xs sticky top-0 z-10 shadow-sm">
                         <tr>
@@ -75,8 +100,11 @@
                             <th class="px-4 py-3 text-right bg-gray-50">Trozadora</th>
                             <th class="px-4 py-3 text-right bg-gray-50">Otros</th>
                             <th class="px-4 py-3 text-right font-bold text-black bg-gray-50">Total</th>
+                            <th class="px-4 py-3 text-right bg-gray-50">Pers.</th>
+                            <th class="px-4 py-3 text-right bg-gray-50">Efic.</th>
                         </tr>
                     </thead>
+
                     <tbody id="tablaCuerpo" class="divide-y divide-gray-100">
                         <!-- Datos insertados por JS -->
                     </tbody>
@@ -87,254 +115,628 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN ---
-        // ID extraído de tu enlace original
+        // ------------------------------------------------------------
+        // CONFIGURACIÓN
+        // ------------------------------------------------------------
         const SHEET_ID = '1X8iWRPzk6DAV7aNDoD2-n-Au4-VVzASSZ9hCgoixDD8';
-        const SHEET_NAME = 'Corte'; 
-        
+        const SHEET_NAME = 'Corte';
+
         let datosCrudos = [];
         let chartInstance = null;
         let modoActual = 'diario';
 
-        // 1. INICIAR CARGA
+        // ------------------------------------------------------------
+        // UTILIDADES
+        // ------------------------------------------------------------
+
+        function celdaTieneDato(celda) {
+            if (!celda) return false;
+
+            const valor = celda.v !== null && celda.v !== undefined ? celda.v : celda.f;
+
+            if (valor === null || valor === undefined) return false;
+            if (String(valor).trim() === '') return false;
+
+            return true;
+        }
+
+        function obtenerValorCelda(celda, valorPorDefecto = null) {
+            if (!celda) return valorPorDefecto;
+
+            if (celda.v !== null && celda.v !== undefined) return celda.v;
+            if (celda.f !== null && celda.f !== undefined) return celda.f;
+
+            return valorPorDefecto;
+        }
+
+        function convertirNumero(valor, valorPorDefecto = 0) {
+            if (valor === null || valor === undefined || valor === '') return valorPorDefecto;
+
+            if (typeof valor === 'number') {
+                return isNaN(valor) ? valorPorDefecto : valor;
+            }
+
+            let texto = String(valor)
+                .trim()
+                .replace('%', '')
+                .replace(/\s/g, '');
+
+            if (texto === '') return valorPorDefecto;
+
+            if (texto.includes(',') && texto.includes('.')) {
+                const ultimaComa = texto.lastIndexOf(',');
+                const ultimoPunto = texto.lastIndexOf('.');
+
+                if (ultimaComa > ultimoPunto) {
+                    texto = texto.replace(/\./g, '').replace(',', '.');
+                } else {
+                    texto = texto.replace(/,/g, '');
+                }
+            } else if (texto.includes(',')) {
+                texto = texto.replace(',', '.');
+            }
+
+            const numero = parseFloat(texto);
+            return isNaN(numero) ? valorPorDefecto : numero;
+        }
+
+        function convertirEficiencia(valor) {
+            if (valor === null || valor === undefined || valor === '') return null;
+
+            let numero = convertirNumero(valor, null);
+
+            if (numero === null || isNaN(numero)) return null;
+
+            // Si viene como 1.01 => 101%
+            if (numero > 0 && numero <= 2) {
+                numero = numero * 100;
+            }
+
+            return numero;
+        }
+
+        function formatearNumero(valor) {
+            return Math.round(valor || 0).toLocaleString('es-PE');
+        }
+
+        function formatearPorcentaje(valor) {
+            if (valor === null || valor === undefined || isNaN(valor)) return '';
+            return `${Math.round(valor)}%`;
+        }
+
+        function formatearPersonas(valor) {
+            if (valor === null || valor === undefined || isNaN(valor)) return '';
+            return `${Math.round(valor)} pers.`;
+        }
+
+        function tienePersonas(d) {
+            return d.personas !== null && d.personas !== undefined && !isNaN(d.personas);
+        }
+
+        function tieneEficiencia(d) {
+            return d.eficiencia !== null && d.eficiencia !== undefined && !isNaN(d.eficiencia);
+        }
+
+        // ------------------------------------------------------------
+        // 1. CARGAR DATOS DESDE GOOGLE SHEETS
+        // ------------------------------------------------------------
         function cargarDatos() {
-            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:manejarRespuesta`;
-            
+            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:manejarRespuesta&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
             const script = document.createElement('script');
             script.src = url;
-            script.onerror = () => alert('Error al cargar. Verifica conexión.');
+            script.onerror = () => alert('Error al cargar. Verifica conexión o permisos del Google Sheet.');
             document.body.appendChild(script);
         }
 
-        // 2. PROCESAR DATOS DE GOOGLE
+        // ------------------------------------------------------------
+        // 2. PROCESAR RESPUESTA DE GOOGLE SHEETS
+        // ------------------------------------------------------------
         window.manejarRespuesta = function(json) {
             const filas = json.table.rows;
-            const cols = json.table.cols; 
 
             datosCrudos = filas.map(fila => {
                 const c = fila.c;
+
                 if (!c || !c[0]) return null;
 
-                // Parsear Fecha
                 let fecha = null;
-                const vFecha = c[0].v; 
-                const fFecha = c[0].f; 
+                const vFecha = obtenerValorCelda(c[0], null);
 
                 if (typeof vFecha === 'string' && vFecha.includes('Date')) {
                     const partes = vFecha.match(/Date\((\d+),(\d+),(\d+)\)/);
-                    fecha = new Date(partes[1], partes[2], partes[3]);
+
+                    if (partes) {
+                        fecha = new Date(
+                            parseInt(partes[1]),
+                            parseInt(partes[2]),
+                            parseInt(partes[3])
+                        );
+                    }
+
                 } else if (typeof vFecha === 'string') {
                     const partes = vFecha.split('-');
+
                     if (partes.length === 3) {
                         let anio = parseInt(partes[2]);
                         if (anio < 100) anio += 2000;
-                        fecha = new Date(anio, parseInt(partes[1])-1, parseInt(partes[0]));
+
+                        fecha = new Date(
+                            anio,
+                            parseInt(partes[1]) - 1,
+                            parseInt(partes[0])
+                        );
+                    } else {
+                        fecha = new Date(vFecha);
                     }
+
                 } else {
                     fecha = new Date(vFecha);
                 }
 
+                const existePersonas = celdaTieneDato(c[5]);
+                const existeEficiencia = celdaTieneDato(c[6]);
+
                 return {
                     fecha: fecha,
-                    servicios: c[1] ? (c[1].v || 0) : 0,
-                    manual: c[2] ? (c[2].v || 0) : 0,
-                    lectra: c[3] ? (c[3].v || 0) : 0,
-                    total: c[4] ? (c[4].v || 0) : 0
+
+                    // A = FECHA
+                    // B = SERVICIOS
+                    // C = MANUAL COFACO
+                    // D = CORTADORA LECTRA
+                    // E = TOTAL
+                    // F = PERSONAS
+                    // G = EFICIENCIA
+                    servicios: convertirNumero(obtenerValorCelda(c[1], 0), 0),
+                    manual: convertirNumero(obtenerValorCelda(c[2], 0), 0),
+                    lectra: convertirNumero(obtenerValorCelda(c[3], 0), 0),
+                    total: convertirNumero(obtenerValorCelda(c[4], 0), 0),
+
+                    personas: existePersonas
+                        ? convertirNumero(obtenerValorCelda(c[5], null), null)
+                        : null,
+
+                    eficiencia: existeEficiencia
+                        ? convertirEficiencia(obtenerValorCelda(c[6], null))
+                        : null
                 };
-            }).filter(d => d !== null && !isNaN(d.fecha));
+            }).filter(d => d !== null && d.fecha instanceof Date && !isNaN(d.fecha));
 
             datosCrudos.sort((a, b) => a.fecha - b.fecha);
 
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('chartWrapper').classList.remove('hidden');
-            
+
             actualizarDashboard();
         };
 
-        // 3. LÓGICA DE FILTRADO Y AGREGACIÓN
-        // parametro 'completo': true para tabla (todos), false para grafico (limitado)
+        // ------------------------------------------------------------
+        // 3. FILTRADO Y AGREGACIÓN
+        // ------------------------------------------------------------
         function procesarDatos(completo = false) {
             let resultado = [];
 
             if (modoActual === 'diario') {
                 resultado = datosCrudos.map(d => {
-                    // 1. Día de la semana 
                     let diaSem = d.fecha.toLocaleDateString('es-PE', { weekday: 'short' });
                     diaSem = diaSem.charAt(0).toUpperCase() + diaSem.slice(1).replace('.', '');
 
-                    // 2. Fecha 
                     let mes = d.fecha.toLocaleDateString('es-PE', { month: 'short' });
                     mes = mes.charAt(0).toUpperCase() + mes.slice(1).replace('.', '');
+
                     const fechaDia = `${d.fecha.getDate()}/${mes}`;
 
                     return {
-                        etiqueta: [diaSem, fechaDia], 
+                        etiqueta: [diaSem, fechaDia],
                         lectra: d.lectra,
                         manual: d.manual,
                         servicios: d.servicios,
-                        total: d.total
+                        total: d.total,
+                        personas: d.personas,
+                        eficiencia: d.eficiencia
                     };
                 });
+
             } else {
-                // Agrupar por Mes
                 const mapaMeses = {};
-                
+
                 datosCrudos.forEach(d => {
                     const key = `${d.fecha.getFullYear()}-${d.fecha.getMonth()}`;
-                    let nombreMes = d.fecha.toLocaleDateString('es-PE', { month: 'short', year: '2-digit' }); 
+
+                    let nombreMes = d.fecha.toLocaleDateString('es-PE', {
+                        month: 'short',
+                        year: '2-digit'
+                    });
+
                     nombreMes = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
-                    
+
                     if (!mapaMeses[key]) {
-                        mapaMeses[key] = { etiqueta: nombreMes, lectra: 0, manual: 0, servicios: 0, total: 0, time: d.fecha.getTime() };
+                        mapaMeses[key] = {
+                            etiqueta: nombreMes,
+                            lectra: 0,
+                            manual: 0,
+                            servicios: 0,
+                            total: 0,
+
+                            personasSuma: 0,
+                            personasConteo: 0,
+
+                            eficienciaSumaPonderada: 0,
+                            eficienciaPesoTotal: 0,
+                            eficienciaSumaSimple: 0,
+                            eficienciaConteo: 0,
+
+                            time: d.fecha.getTime()
+                        };
                     }
-                    
+
                     mapaMeses[key].lectra += d.lectra;
                     mapaMeses[key].manual += d.manual;
                     mapaMeses[key].servicios += d.servicios;
                     mapaMeses[key].total += d.total;
+
+                    if (tienePersonas(d)) {
+                        mapaMeses[key].personasSuma += d.personas;
+                        mapaMeses[key].personasConteo += 1;
+                    }
+
+                    if (tieneEficiencia(d)) {
+                        mapaMeses[key].eficienciaSumaSimple += d.eficiencia;
+                        mapaMeses[key].eficienciaConteo += 1;
+
+                        if (d.total > 0) {
+                            mapaMeses[key].eficienciaSumaPonderada += d.eficiencia * d.total;
+                            mapaMeses[key].eficienciaPesoTotal += d.total;
+                        }
+                    }
                 });
 
-                resultado = Object.values(mapaMeses).sort((a, b) => a.time - b.time);
+                resultado = Object.values(mapaMeses)
+                    .sort((a, b) => a.time - b.time)
+                    .map(m => {
+                        const personasPromedio = m.personasConteo > 0
+                            ? m.personasSuma / m.personasConteo
+                            : null;
+
+                        const eficienciaFinal = m.eficienciaPesoTotal > 0
+                            ? m.eficienciaSumaPonderada / m.eficienciaPesoTotal
+                            : (
+                                m.eficienciaConteo > 0
+                                    ? m.eficienciaSumaSimple / m.eficienciaConteo
+                                    : null
+                            );
+
+                        return {
+                            etiqueta: m.etiqueta,
+                            lectra: m.lectra,
+                            manual: m.manual,
+                            servicios: m.servicios,
+                            total: m.total,
+                            personas: personasPromedio,
+                            eficiencia: eficienciaFinal,
+                            time: m.time
+                        };
+                    });
             }
 
             if (completo) {
-                // Para la tabla devolvemos TODO el historial, invertido para ver lo más reciente arriba
                 return [...resultado].reverse();
-            } else {
-                // Para el gráfico solo los últimos 6
-                return resultado.slice(-6);
             }
+
+            return resultado.slice(-6);
         }
 
-        // 4. RENDERIZAR GRÁFICO Y TABLA
-        function actualizarDashboard() {
-            // A) Datos para Gráfico (Limitado a 6)
-            const datosGrafico = procesarDatos(false);
-            
-            // B) Datos para Tabla (Todos los que haya en el sheet)
-            const datosTabla = procesarDatos(true);
-            
-            // 4.1 Renderizar Tabla
-            const tbody = document.getElementById('tablaCuerpo');
-            tbody.innerHTML = datosTabla.map(d => {
-                const labelTabla = Array.isArray(d.etiqueta) ? d.etiqueta.join(' ') : d.etiqueta;
-                return `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-2 font-medium text-gray-700 whitespace-nowrap">${labelTabla}</td>
-                    <td class="px-4 py-2 text-right text-yellow-600">${d.lectra.toLocaleString()}</td>
-                    <td class="px-4 py-2 text-right text-orange-600">${d.manual.toLocaleString()}</td>
-                    <td class="px-4 py-2 text-right text-blue-600">${d.servicios.toLocaleString()}</td>
-                    <td class="px-4 py-2 text-right font-bold text-gray-900">${d.total.toLocaleString()}</td>
-                </tr>
-            `}).join(''); 
+        // ------------------------------------------------------------
+        // 4. PLUGIN PERSONALIZADO PARA TEXTO SUPERIOR
+        // ------------------------------------------------------------
+        const resumenSuperiorPlugin = {
+            id: 'resumenSuperiorPlugin',
 
-            // 4.2 Renderizar Gráfico
+            afterDatasetsDraw(chart) {
+                const { ctx, scales } = chart;
+                const yScale = scales.y;
+
+                if (!yScale) return;
+
+                const datos = chart.data.__datosGrafico || [];
+                const metaLectra = chart.getDatasetMeta(1) || chart.getDatasetMeta(0);
+                // usamos una barra como referencia de posición x
+
+                ctx.save();
+
+                datos.forEach((d, index) => {
+                    const barra = metaLectra.data[index];
+                    if (!barra) return;
+
+                    const x = barra.x;
+                    const yTotal = yScale.getPixelForValue(d.total);
+
+                    const hayPersonas = tienePersonas(d);
+                    const hayEficiencia = tieneEficiencia(d);
+                    const hayBloqueSuperior = hayPersonas || hayEficiencia;
+
+                    if (hayBloqueSuperior) {
+                        let yCursor = yTotal - 58;
+
+                        if (hayEficiencia) {
+                            ctx.fillStyle = '#166534'; // verde oscuro
+                            ctx.font = 'bold 12px Segoe UI, Arial, sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(formatearPorcentaje(d.eficiencia), x, yCursor);
+                            yCursor += 16;
+                        }
+
+                        if (hayPersonas) {
+                            ctx.fillStyle = '#374151';
+                            ctx.font = 'bold 11px Segoe UI, Arial, sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(formatearPersonas(d.personas), x, yCursor);
+                            yCursor += 13;
+                        }
+
+                        ctx.strokeStyle = '#9ca3af';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(x - 24, yCursor);
+                        ctx.lineTo(x + 24, yCursor);
+                        ctx.stroke();
+                    }
+
+                    ctx.fillStyle = '#111827';
+                    ctx.font = 'bold 12px Segoe UI, Arial, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(formatearNumero(d.total), x, yTotal - 13);
+                });
+
+                ctx.restore();
+            }
+        };
+
+        // ------------------------------------------------------------
+        // 5. RENDERIZAR DASHBOARD
+        // ------------------------------------------------------------
+        function actualizarDashboard() {
+            const datosGrafico = procesarDatos(false);
+            const datosTabla = procesarDatos(true);
+
+            // --------------------------------------------------------
+            // 5.1 TABLA
+            // --------------------------------------------------------
+            const tbody = document.getElementById('tablaCuerpo');
+
+            tbody.innerHTML = datosTabla.map(d => {
+                const labelTabla = Array.isArray(d.etiqueta)
+                    ? d.etiqueta.join(' ')
+                    : d.etiqueta;
+
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2 font-medium text-gray-700 whitespace-nowrap">${labelTabla}</td>
+                        <td class="px-4 py-2 text-right text-yellow-600">${formatearNumero(d.lectra)}</td>
+                        <td class="px-4 py-2 text-right text-orange-600">${formatearNumero(d.manual)}</td>
+                        <td class="px-4 py-2 text-right text-blue-600">${formatearNumero(d.servicios)}</td>
+                        <td class="px-4 py-2 text-right font-bold text-gray-900">${formatearNumero(d.total)}</td>
+                        <td class="px-4 py-2 text-right text-gray-700">${tienePersonas(d) ? Math.round(d.personas) : ''}</td>
+                        <td class="px-4 py-2 text-right text-green-800 font-semibold">${tieneEficiencia(d) ? formatearPorcentaje(d.eficiencia) : ''}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // --------------------------------------------------------
+            // 5.2 GRÁFICO
+            // --------------------------------------------------------
             const ctx = document.getElementById('miGrafico').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
 
             const labelsInner = {
                 color: 'white',
-                font: { weight: 'bold', size: 11 },
-                formatter: (val) => val > 0 ? val.toLocaleString() : '' 
+                font: {
+                    weight: 'bold',
+                    size: 11
+                },
+                formatter: (val) => val > 0 ? formatearNumero(val) : ''
             };
+
+            const maxTotal = datosGrafico.length > 0
+                ? Math.max(...datosGrafico.map(d => d.total || 0))
+                : 0;
+
+            const eficienciasValidas = datosGrafico
+                .map(d => d.eficiencia)
+                .filter(v => v !== null && v !== undefined && !isNaN(v));
+
+            const maxEficiencia = eficienciasValidas.length > 0
+                ? Math.max(...eficienciasValidas)
+                : 100;
+
+            const maxEjeEficiencia = Math.max(100, Math.ceil(maxEficiencia / 10) * 10);
+
+            const dataConfig = {
+                labels: datosGrafico.map(d => d.etiqueta),
+                datasets: [
+                    // Línea de eficiencia PRIMERO para que quede detrás
+                    {
+                        label: 'Eficiencia',
+                        type: 'line',
+                        data: datosGrafico.map(d => tieneEficiencia(d) ? d.eficiencia : null),
+                        yAxisID: 'yEficiencia',
+
+                        borderColor: 'rgba(22, 101, 52, 0.80)',       // verde oscuro
+                        backgroundColor: 'rgba(22, 101, 52, 0.25)',
+                        pointBackgroundColor: 'rgba(22, 101, 52, 0.35)',
+                        pointBorderColor: 'rgba(22, 101, 52, 0.65)',
+
+                        pointRadius: 5,
+                        pointHoverRadius: 6,
+                        pointBorderWidth: 1.5,
+                        borderWidth: 2.5,
+                        tension: 0.35,
+                        spanGaps: false,
+                        fill: false,
+
+                        // IMPORTANTE:
+                        // orden alto = se dibuja antes = queda detrás
+                        order: 99,
+
+                        datalabels: {
+                            display: false
+                        }
+                    },
+                    {
+                        label: 'Lectra',
+                        type: 'bar',
+                        data: datosGrafico.map(d => d.lectra),
+                        backgroundColor: '#eab308',
+                        stack: 'pila1',
+                        yAxisID: 'y',
+                        order: 1,
+                        datalabels: {
+                            ...labelsInner,
+                            color: 'black'
+                        }
+                    },
+                    {
+                        label: 'Trozadora',
+                        type: 'bar',
+                        data: datosGrafico.map(d => d.manual),
+                        backgroundColor: '#f97316',
+                        stack: 'pila1',
+                        yAxisID: 'y',
+                        order: 1,
+                        datalabels: labelsInner
+                    },
+                    {
+                        label: 'Otros',
+                        type: 'bar',
+                        data: datosGrafico.map(d => d.servicios),
+                        backgroundColor: '#2563eb',
+                        stack: 'pila1',
+                        yAxisID: 'y',
+                        order: 1,
+                        datalabels: labelsInner
+                    }
+                ]
+            };
+
+            dataConfig.__datosGrafico = datosGrafico;
 
             chartInstance = new Chart(ctx, {
                 type: 'bar',
-                data: {
-                    labels: datosGrafico.map(d => d.etiqueta),
-                    datasets: [
-                        {
-                            label: 'Lectra',
-                            data: datosGrafico.map(d => d.lectra),
-                            backgroundColor: '#eab308', 
-                            stack: 'pila1',
-                            datalabels: { ...labelsInner, color: 'black' } 
-                        },
-                        {
-                            label: 'Trozadora',
-                            data: datosGrafico.map(d => d.manual),
-                            backgroundColor: '#f97316', 
-                            stack: 'pila1',
-                            datalabels: labelsInner
-                        },
-                        {
-                            label: 'Otros',
-                            data: datosGrafico.map(d => d.servicios),
-                            backgroundColor: '#2563eb', 
-                            stack: 'pila1',
-                            datalabels: labelsInner
-                        },
-                        {
-                            label: 'Total',
-                            data: datosGrafico.map(() => 0), 
-                            backgroundColor: 'transparent',
-                            borderColor: 'transparent',
-                            stack: 'pila1', 
-                            datalabels: {
-                                align: 'end',
-                                anchor: 'end',
-                                color: '#333',
-                                font: { weight: 'bold', size: 12 },
-                                formatter: (val, ctx) => datosGrafico[ctx.dataIndex].total.toLocaleString(),
-                                offset: -5 
-                            }
-                        }
-                    ]
-                },
-                plugins: [ChartDataLabels],
+                data: dataConfig,
+                plugins: [
+                    ChartDataLabels,
+                    resumenSuperiorPlugin
+                ],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+
                     layout: {
-                        padding: { top: 5 }
+                        padding: {
+                            top: 70,
+                            right: 8,
+                            left: 8,
+                            bottom: 5
+                        }
                     },
+
                     scales: {
-                        x: { 
-                            grid: { display: false },
-                            ticks: { font: { weight: 'bold' } }
+                        x: {
+                            stacked: true,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
                         },
-                        y: { display: false, stacked: true } 
+
+                        y: {
+                            display: false,
+                            stacked: true,
+                            beginAtZero: true,
+                            suggestedMax: maxTotal * 1.25
+                        },
+
+                        yEficiencia: {
+                            display: false,
+                            position: 'right',
+                            beginAtZero: true,
+                            min: 0,
+                            max: maxEjeEficiencia,
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
                     },
+
                     plugins: {
                         legend: {
                             position: 'top',
                             align: 'start',
                             labels: {
                                 usePointStyle: true,
-                                filter: (item) => item.text !== 'Total' 
+                                filter: (item) => item.text !== 'Eficiencia'
                             }
                         },
+
                         tooltip: {
-                            filter: (item) => item.datasetIndex !== 3 
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.dataset.label === 'Eficiencia') {
+                                        if (context.raw === null || context.raw === undefined) return '';
+                                        return `Eficiencia: ${formatearPorcentaje(context.raw)}`;
+                                    }
+
+                                    return `${context.dataset.label}: ${formatearNumero(context.raw)}`;
+                                }
+                            }
+                        },
+
+                        datalabels: {
+                            clip: false
                         }
                     }
                 }
             });
         }
 
-        // 5. CAMBIAR MODO (Botones)
+        // ------------------------------------------------------------
+        // 6. CAMBIAR MODO
+        // ------------------------------------------------------------
         window.cambiarModo = function(modo) {
             modoActual = modo;
+
             const btnDiario = document.getElementById('btnDiario');
             const btnMensual = document.getElementById('btnMensual');
 
             if (modo === 'diario') {
                 btnDiario.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
                 btnDiario.classList.remove('text-gray-500');
+
                 btnMensual.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
                 btnMensual.classList.add('text-gray-500');
             } else {
                 btnMensual.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
                 btnMensual.classList.remove('text-gray-500');
+
                 btnDiario.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
                 btnDiario.classList.add('text-gray-500');
             }
 
             actualizarDashboard();
-        }
+        };
 
         cargarDatos();
-
     </script>
+
 </body>
 </html>
