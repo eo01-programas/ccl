@@ -427,7 +427,7 @@
         }
 
         // ------------------------------------------------------------
-        // 4. PLUGIN PERSONALIZADO PARA TEXTO SUPERIOR
+        // 4. PLUGIN PERSONALIZADO PARA TEXTO SUPERIOR DE BARRAS
         // ------------------------------------------------------------
         const resumenSuperiorPlugin = {
             id: 'resumenSuperiorPlugin',
@@ -439,8 +439,9 @@
                 if (!yScale) return;
 
                 const datos = chart.data.__datosGrafico || [];
+
+                // Dataset 1 = Lectra, porque Dataset 0 es la línea de eficiencia
                 const metaLectra = chart.getDatasetMeta(1) || chart.getDatasetMeta(0);
-                // usamos una barra como referencia de posición x
 
                 ctx.save();
 
@@ -452,29 +453,21 @@
                     const yTotal = yScale.getPixelForValue(d.total);
 
                     const hayPersonas = tienePersonas(d);
-                    const hayEficiencia = tieneEficiencia(d);
-                    const hayBloqueSuperior = hayPersonas || hayEficiencia;
 
-                    if (hayBloqueSuperior) {
-                        let yCursor = yTotal - 58;
+                    // Encima de la barra ahora SOLO va:
+                    // ## pers.
+                    // línea separadora
+                    // TOTAL
+                    if (hayPersonas) {
+                        let yCursor = yTotal - 38;
 
-                        if (hayEficiencia) {
-                            ctx.fillStyle = '#166534'; // verde oscuro
-                            ctx.font = 'bold 12px Segoe UI, Arial, sans-serif';
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText(formatearPorcentaje(d.eficiencia), x, yCursor);
-                            yCursor += 16;
-                        }
+                        ctx.fillStyle = '#374151';
+                        ctx.font = 'bold 11px Segoe UI, Arial, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(formatearPersonas(d.personas), x, yCursor);
 
-                        if (hayPersonas) {
-                            ctx.fillStyle = '#374151';
-                            ctx.font = 'bold 11px Segoe UI, Arial, sans-serif';
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText(formatearPersonas(d.personas), x, yCursor);
-                            yCursor += 13;
-                        }
+                        yCursor += 13;
 
                         ctx.strokeStyle = '#9ca3af';
                         ctx.lineWidth = 1;
@@ -490,6 +483,40 @@
                     ctx.textBaseline = 'middle';
                     ctx.fillText(formatearNumero(d.total), x, yTotal - 13);
                 });
+
+                ctx.restore();
+            }
+        };
+
+        // ------------------------------------------------------------
+        // 4.1 PLUGIN PARA MOSTRAR "%Ef." A LA DERECHA DE LA LEYENDA
+        // ------------------------------------------------------------
+        const etiquetaEficienciaDerechaPlugin = {
+            id: 'etiquetaEficienciaDerechaPlugin',
+
+            afterDraw(chart) {
+                const { ctx, legend } = chart;
+
+                if (!legend) return;
+
+                const datos = chart.data.__datosGrafico || [];
+                const hayEficiencia = datos.some(d => tieneEficiencia(d));
+
+                // Si no hay eficiencia, no mostrar "%Ef."
+                if (!hayEficiencia) return;
+
+                ctx.save();
+
+                ctx.fillStyle = '#166534';
+                ctx.font = 'bold 12px Segoe UI, Arial, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+
+                // Misma línea visual de la leyenda Lectra / Trozadora / Otros
+                const x = chart.width - 8;
+                const y = legend.top + (legend.height / 2);
+
+                ctx.fillText('%Ef.', x, y);
 
                 ctx.restore();
             }
@@ -560,17 +587,16 @@
             const dataConfig = {
                 labels: datosGrafico.map(d => d.etiqueta),
                 datasets: [
-                    // Línea de eficiencia PRIMERO para que quede detrás
                     {
                         label: 'Eficiencia',
                         type: 'line',
                         data: datosGrafico.map(d => tieneEficiencia(d) ? d.eficiencia : null),
                         yAxisID: 'yEficiencia',
 
-                        borderColor: 'rgba(22, 101, 52, 0.80)',       // verde oscuro
+                        borderColor: 'rgba(22, 101, 52, 0.80)',
                         backgroundColor: 'rgba(22, 101, 52, 0.25)',
-                        pointBackgroundColor: 'rgba(22, 101, 52, 0.35)',
-                        pointBorderColor: 'rgba(22, 101, 52, 0.65)',
+                        pointBackgroundColor: 'rgba(22, 101, 52, 0.45)',
+                        pointBorderColor: 'rgba(22, 101, 52, 0.80)',
 
                         pointRadius: 5,
                         pointHoverRadius: 6,
@@ -580,12 +606,27 @@
                         spanGaps: false,
                         fill: false,
 
-                        // IMPORTANTE:
-                        // orden alto = se dibuja antes = queda detrás
+                        // order alto = se dibuja antes = queda detrás
                         order: 99,
 
+                        // Etiqueta de dato del porcentaje sobre cada punto
                         datalabels: {
-                            display: false
+                            display: function(context) {
+                                const valor = context.dataset.data[context.dataIndex];
+                                return valor !== null && valor !== undefined && !isNaN(valor);
+                            },
+                            formatter: function(value) {
+                                return formatearPorcentaje(value);
+                            },
+                            color: '#166534',
+                            font: {
+                                weight: 'bold',
+                                size: 11
+                            },
+                            anchor: 'end',
+                            align: 'top',
+                            offset: 6,
+                            clip: false
                         }
                     },
                     {
@@ -631,7 +672,8 @@
                 data: dataConfig,
                 plugins: [
                     ChartDataLabels,
-                    resumenSuperiorPlugin
+                    resumenSuperiorPlugin,
+                    etiquetaEficienciaDerechaPlugin
                 ],
                 options: {
                     responsive: true,
@@ -639,7 +681,7 @@
 
                     layout: {
                         padding: {
-                            top: 70,
+                            top: 2,
                             right: 8,
                             left: 8,
                             bottom: 5
@@ -684,6 +726,9 @@
                             align: 'start',
                             labels: {
                                 usePointStyle: true,
+
+                                // Ocultamos la leyenda real de la línea,
+                                // pero mostramos "%Ef." manualmente pegado a la derecha.
                                 filter: (item) => item.text !== 'Eficiencia'
                             }
                         },
